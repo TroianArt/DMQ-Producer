@@ -30,7 +30,7 @@ class Producer:
             for queue in node['queues']:
                 queue_id = queue['id']
                 current_queue = list(filter(lambda x: x['id'] == queue_id, current_node['queues']))[0]
-                if queue_id == self.queue_id and queue['size'] <= current_queue['size']:
+                if queue_id == self.__queue_id and queue['size'] <= current_queue['size']:
                     current_node = node
         self.__current_node = current_node
         return self.__current_node
