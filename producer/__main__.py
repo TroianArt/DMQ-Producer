@@ -5,7 +5,7 @@ class Producer:
     def __init__(self, manager_url, queue_id, load_balancing_strategy="size"):
         self.__manager_host, self.__manager_port = manager_url
         self.__load_balancing_strategy = load_balancing_strategy
-        self.queue_id = queue_id
+        self.__queue_id = queue_id
         self.__current_node = {}
         self.__current_request = 0
         self.number_of_requests = 10
