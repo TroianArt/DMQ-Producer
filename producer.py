@@ -44,3 +44,14 @@ class Producer:
         url = 'http://' + self.__manager_host + ':' + self.__manager_port
         response = requests.post(url, json={key: value})
         return response.json()
+
+
+if __name__ == '__main__':
+    producer = Producer(('http://127.0.0.1', '5000'), '0001', 'cpu')
+
+    for i in range(15):
+        message = {
+            "text": "Message " + str(i)
+        }
+
+        producer.produce('messages', message)
