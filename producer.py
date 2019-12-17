@@ -2,8 +2,13 @@ import requests
 
 
 class Producer:
-    def __init__(self, manager_url, queue_id, load_balancing_strategy="size"):
+    def __init__(self, username, password, manager_url, queue_id, load_balancing_strategy="size"):
+        self.__username = username
+        self.__password = password
         self.__manager_host, self.__manager_port = manager_url
+        access_token, refresh_token = self.__login()
+        self.__access_token = access_token
+        self.__refresh_token = refresh_token
         self.__load_balancing_strategy = load_balancing_strategy
         self.__queue_id = queue_id
         self.__current_node = {}
@@ -41,9 +46,36 @@ class Producer:
         self.balance_by_size()
 
     def produce(self, key, value):
-        url = 'http://' + self.__manager_host + ':' + self.__manager_port
-        response = requests.post(url, json={key: value})
-        return response.json()
+        url = 'http://' + self.__manager_host + ':' + self.__manager_port + '/queues/' + self.__queue_id + '/message/'
+        response = requests.post(url, headers={key: value})
+        if response.status_code == 200:
+            self.__current_request += 1
+            return response.json()
+        elif response.status_code == 403:
+            if self.__refresh():
+                return self.produce(key, value)
+
+    def __login(self):
+        credentials = {
+            'username': self.__username,
+            'password': self.__password
+        }
+        url = 'http://' + self.__manager_host + ':' + self.__manager_port + '/login'
+        response = requests.post(url=url, json=credentials).json()
+        if response.status_code == 200:
+            return response['access_token'], response['refresh_token']
+        else:
+            raise Exception('Refresh token not generated')
+
+    def __refresh(self):
+        url = 'http://' + self.__manager_host + ':' + self.__manager_port + '/refresh'
+        response = requests.post(url=url, headers={'refresh_token': self.__refresh_token}).json()
+        if response.status_code == 200:
+            self.__refresh_token = response['refresh_token']
+            self.__access_token = response['access_token']
+            return True
+        else:
+            raise Exception('access denied')
 
 
 if __name__ == '__main__':
