@@ -1,5 +1,4 @@
-import requests
-from producer.__main__ import *
+from producer import *
 import unittest
 from unittest import mock
 
@@ -87,7 +86,3 @@ class TestProducer(unittest.TestCase):
     def test_fetch2(self, get):
         balanced_data_node_bu_size = self.example_producer.balance_by_size()
         self.assertDictEqual(self.data_node, balanced_data_node_bu_size)
-
-
-if __name__ == 'main':
-    unittest.main()
